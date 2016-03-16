@@ -1,0 +1,12 @@
+monitoringclient/Release
+monitoringclient/Debug
+*.exe
+*.pdb
+*.ncb
+*.iobj
+*.ipdb
+*.suo
+*.sdf
+*.opensdf
+*.aps
+*.opendb
