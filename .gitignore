@@ -1,4 +1,5 @@
-monitoringclient/Release
+monitoringclient/monitoringclient/Release
+monitoringclient/monitoringclient/Debug
 monitoringclient/Debug
 *.exe
 *.pdb
