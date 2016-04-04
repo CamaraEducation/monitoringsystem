@@ -12,8 +12,6 @@ using namespace std;
 
 int main()
 {
-	_setmode(_fileno(stdout), _O_U16TEXT);
-
 	for (int i = 0; i < 50; i++) {
 		Sleep(4000);
 
@@ -23,9 +21,20 @@ int main()
 			int bufsize = GetWindowTextLength(handle) + 1;
 			LPWSTR title = new WCHAR[bufsize];
 			GetWindowText(handle, title, bufsize);
-			wprintf(L"%s\n", title);
+
+			char* ascii_title = new char[bufsize + 1];
+
+			setlocale(LC_ALL, ".1252");
+			wcstombs(ascii_title, title, bufsize);
+
+			for (int i = 0; i <= bufsize; i++) {
+				if ((int)ascii_title[i]==-105)
+					ascii_title[i] = '-';
+			}
+			cout << ascii_title << endl;
 
 			delete [] title;
+			delete [] ascii_title;
 		}
 	}
 
