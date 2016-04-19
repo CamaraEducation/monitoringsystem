@@ -2,70 +2,48 @@
 //
 
 #include "stdafx.h"
-#include <iostream>
-#include <fcntl.h>
-#include <io.h>
-#include <string>
+#include "ddeutil.h"
+#include <fstream>
+#include "retriever.h"
+#include <conio.h>
 
 using namespace std;
 
+void panic(char *what)
+{
+	MessageBoxA(NULL, what, "camaratracker", MB_OK);
+	exit(0);
+}
 
 int main()
 {
-	const int MAXSTR = 1000;
+	if (!ddeinit()) panic("CT: Cannot initialize DDE");
 
-	char exename[MAXSTR];
-	*exename = 0;
+	
+	ofstream out_file;
+	out_file.open("sample_output.txt");
 
-	for (int i = 0; i < 50; i++) {
-		Sleep(4000);
+	MSG msg;
+	SetTimer(NULL, NULL, 2*1000, retriever);
 
-		HWND win_handle = GetForegroundWindow();
 
-		if (win_handle){
-			int bufsize = GetWindowTextLength(win_handle) + 1;
-			LPWSTR title = new WCHAR[bufsize];
-			GetWindowText(win_handle, title, bufsize);
+	while (GetMessage(&msg, NULL, 0, 0))
+	{
+		TranslateMessage(&msg);
+		DispatchMessage(&msg);
 
-			char* ascii_title = new char[bufsize + 1];
-
-			setlocale(LC_ALL, ".1252");
-			wcstombs(ascii_title, title, bufsize);
-
-			for (int i = 0; i <= bufsize; i++) {
-				if ((int)ascii_title[i]==-105)
-					ascii_title[i] = '-';
-			}
-			cout << ascii_title << endl;
-
-			DWORD proc_id = 0;
-			GetWindowThreadProcessId(win_handle, &proc_id);
-			HANDLE proc_handle = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ /*|PROCESS_SET_QUOTA*/, FALSE, proc_id);
-
-			wchar_t uexename[MAXSTR];
-			DWORD testl = sizeof(uexename);
-			QueryFullProcessImageNameW(proc_handle, 0, uexename, &testl);
-			uexename[MAXSTR - 1] = 0;
-			WideCharToMultiByte(CP_UTF8, 0, uexename, -1, exename, MAXSTR, NULL, NULL);
-			exename[MAXSTR - 1] = 0;
-
-			char *trim = strrchr(exename, '\\');
-			if (trim) memmove(exename, trim + 1, strlen(trim));
-			char *ext = strrchr(exename, '.');
-			if (ext) *ext = 0;
-			for (char *p = exename; *p; p++) *p = tolower(*p);
-			CloseHandle(proc_handle);
-
-			cout << "Exename: " << exename << endl << endl;
-
-			delete [] title;
-			delete [] ascii_title;
+		if (_kbhit()) {
+			break;
 		}
 	}
-
 	char waitchar;
 
 	cin >> waitchar;
+
+	out_file.close();
+
+	ddeclean();
+
 
     return 0;
 }
